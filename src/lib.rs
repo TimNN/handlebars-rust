@@ -53,7 +53,7 @@
 //!
 //! You can use default `render` function to render a template into `String`. From 0.9, there's `renderw` to render text into anything of `std::io::Write`.
 //!
-//! ```
+//! ```ignore
 //! extern crate rustc_serialize;
 //! extern crate handlebars;
 //!
@@ -90,6 +90,10 @@
 //!   let result = handlebars.render("hello", &data);
 //! }
 //! ```
+//!
+//! #### Escaping
+//!
+//! As per the handlebars spec, output using `{{expression}}` is escaped by default (to be precise, the characters `&"<>` are replaced by their respective html / xml entities). However, since the use cases of a rust template engine are probably a bit more diverse than those of a JavaScript one, this implementation allows the user to supply a custom escape function to be used instead. For more information see the `EscapeFn` type and `Handlebars::register_escape_fn()` method.
 //!
 //! ### Custom Helper
 //!
@@ -180,13 +184,19 @@
 #[macro_use] extern crate lazy_static;
 #[cfg(test)] #[macro_use] extern crate maplit;
 
+#[cfg(not(feature = "serde_type"))]
 extern crate rustc_serialize as serialize;
 extern crate regex;
 extern crate num;
 
+#[cfg(feature = "serde_type")]
+extern crate serde;
+#[cfg(feature = "serde_type")]
+extern crate serde_json;
+
 pub use self::template::{Template};
 pub use self::error::TemplateError;
-pub use self::registry::Registry as Handlebars;
+pub use self::registry::{EscapeFn, Registry as Handlebars};
 pub use self::render::{Renderable, RenderError, RenderContext, Helper};
 pub use self::helpers::{HelperDef};
 pub use self::context::{Context, JsonRender, JsonTruthy};
